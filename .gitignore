@@ -1,0 +1,7 @@
+dataset/test/*
+dataset/train/*
+dataset/valid/*
+
+venv/
+
+banana_cnn.pth
