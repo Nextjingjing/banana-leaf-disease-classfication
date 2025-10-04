@@ -2,27 +2,14 @@ version: "3.9"
 
 services:
   banana-cpu:
+    build:
+      context: .
+      args:
+        DEVICE: cpu
+        TORCH_VERSION: "2.3.1"
+        TV_VERSION: "0.18.1"
+        TA_VERSION: "2.3.1"
     image: banana-leaf:cpu
-    build:
-      context: .
-      args:
-        BASE_IMAGE: pytorch/pytorch:2.3.1-cpu
-    working_dir: /app
-    volumes:
-      - ./:/app
-      - ./data:/data          # ใส่ dataset ไว้ที่ ./data บนเครื่องเรา
-      - ./runs:/app/runs      # เก็บผลลัพธ์/โมเดล
-    environment:
-      - DATA_DIR=/data        # ให้สคริปต์อ้างอิง path นี้
-      - OUTPUT_DIR=/app/runs
-    tty: true
-
-  banana-gpu:
-    image: banana-leaf:gpu
-    build:
-      context: .
-      args:
-        BASE_IMAGE: pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime
     working_dir: /app
     volumes:
       - ./:/app
@@ -32,9 +19,30 @@ services:
       - DATA_DIR=/data
       - OUTPUT_DIR=/app/runs
     tty: true
-    # ต้องมี NVIDIA Container Toolkit ติดตั้งในโฮสต์
+
+  banana-gpu:
+    build:
+      context: .
+      args:
+        DEVICE: gpu
+        TORCH_VERSION: "2.3.1"
+        TV_VERSION: "0.18.1"
+        TA_VERSION: "2.3.1"
+    image: banana-leaf:gpu
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ./data:/data
+      - ./runs:/app/runs
+    environment:
+      - DATA_DIR=/data
+      - OUTPUT_DIR=/app/runs
+    tty: true
+    # ต้องติดตั้ง NVIDIA Container Toolkit บนโฮสต์
     deploy:
       resources:
         reservations:
           devices:
-            - capabilities: ["gpu"]
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

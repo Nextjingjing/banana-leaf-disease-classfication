@@ -16,8 +16,8 @@ banana-leaf-disease-classfication/
 ├─ Dockerfile
 ├─ docker-compose.yml
 ├─ .dockerignore
-├─ data/                # dataset ที่ใช้เทรน/ทดสอบ
-└─ runs/                # เก็บผลลัพธ์และโมเดล
+├─ banana_cnn.pth        # ไฟล์โมเดลที่ได้หลังการเทรน
+└─ dataset/              # dataset สำหรับ train/valid/test
 ```
 
 ---
@@ -28,12 +28,12 @@ banana-leaf-disease-classfication/
 
 #### CPU
 ```bash
-docker build -t banana-leaf:cpu .
+docker compose build banana-cpu
 ```
 
 #### GPU (CUDA)
 ```bash
-docker build --build-arg BASE_IMAGE=pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime -t banana-leaf:gpu .
+docker compose build banana-gpu
 ```
 
 ---
@@ -48,24 +48,24 @@ docker compose run --rm banana-cpu
 #### เทรนโมเดล (CPU)
 ```bash
 docker compose run --rm banana-cpu \
-  python train.py --data /data --out /app/runs
+  python train.py --data dataset --out .
 ```
 
 #### ประเมินผล (CPU)
 ```bash
 docker compose run --rm banana-cpu \
-  python evaluate.py --data /data --out /app/runs
+  python evaluate.py --data dataset --out .
 ```
 
 #### ทดสอบ (CPU)
 ```bash
 docker compose run --rm banana-cpu \
-  python test.py --data /data --out /app/runs
+  python test.py --data dataset --out .
 ```
 
 #### ใช้งาน GPU
 ```bash
-docker compose run --rm banana-gpu python train.py --data /data --out /app/runs
+docker compose run --rm banana-gpu python train.py --data dataset --out .
 ```
 
 ---
@@ -75,17 +75,17 @@ docker compose run --rm banana-gpu python train.py --data /data --out /app/runs
 - Dataset (Roboflow): [Banana Leaf Disease](https://app.roboflow.com/mango-0rmdb/banana-leaf-disease-yxrhe/1)  
 - Original Dataset (Kaggle): [Banana Disease Recognition Dataset](https://www.kaggle.com/datasets/sujaykapadnis/banana-disease-recognition-dataset)
 
-โปรเจกต์นี้คาดหวังให้มี dataset อยู่ใน `./data` เช่น:
+โปรเจกต์นี้คาดหวังให้มี dataset อยู่ใน `./dataset` เช่น:
 ```
-data/
+dataset/
 ├── train/
-│ ├── Banana Black Sigatoka Disease/
-│ ├── Banana Bract Mosaic Virus Disease/
-│ ├── Banana Healthy Leaf/
-│ ├── Banana Insect Pest Disease/
-│ ├── Banana Moko Disease/
-│ ├── Banana Panama Disease/
-│ └── Banana Yellow Sigatoka Disease/
+│   ├── Banana Black Sigatoka Disease/
+│   ├── Banana Bract Mosaic Virus Disease/
+│   ├── Banana Healthy Leaf/
+│   ├── Banana Insect Pest Disease/
+│   ├── Banana Moko Disease/
+│   ├── Banana Panama Disease/
+│   └── Banana Yellow Sigatoka Disease/
 ├── valid/ ...
 └── test/ ...
 ```
@@ -96,7 +96,7 @@ data/
 
 - ไฟล์ `requirements.txt` จะถูกติดตั้งใน container โดยเว้น **torch/torchvision** ให้ใช้จาก base image เพื่อหลีกเลี่ยงปัญหาเวอร์ชันชนกัน
 - หากต้องการระบุเวอร์ชัน PyTorch เอง สามารถแก้ `Dockerfile` ได้
-- ใช้ `runs/` เพื่อเก็บ checkpoint และผลลัพธ์ทั้งหมด
+- ไฟล์โมเดล `.pth` จะถูกบันทึกไว้ที่ root ของโปรเจกต์
 - ต้องติดตั้ง [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) หากจะรัน GPU บน Docker
 
 ---
