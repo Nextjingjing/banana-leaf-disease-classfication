@@ -1,7 +1,8 @@
 dataset/test/*
 dataset/train/*
 dataset/valid/*
-
+output/*
 venv/
 
 banana_cnn.pth
+.DS_Store

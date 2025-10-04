@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -55,9 +56,11 @@ def imshow(inp, title=None):
     plt.axis('off')
 
 # ===============================
-# 5. Show predictions หลาย batch
+# 5. Run Test & Save Results
 # ===============================
-n_batches_to_show = 3  # ปรับจำนวน batch ที่อยากดู
+n_batches_to_show = 3  # จำนวน batch ที่อยาก save
+output_dir = "output/test"
+os.makedirs(output_dir, exist_ok=True)
 
 for batch_idx, (inputs, labels) in enumerate(test_loader):
     if batch_idx >= n_batches_to_show:
@@ -81,4 +84,10 @@ for batch_idx, (inputs, labels) in enumerate(test_loader):
         imshow(inputs[i].cpu(), title=title)
 
     plt.tight_layout()
-    plt.show()
+
+    save_path = os.path.join(output_dir, f"batch_{batch_idx}.png")
+    plt.savefig(save_path, dpi=150)
+    plt.close()
+    print(f"[INFO] Saved: {save_path}")
+
+print(f"All test results saved to {output_dir}")

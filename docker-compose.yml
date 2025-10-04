@@ -1,44 +1,30 @@
-version: "3.9"
-
 services:
   banana-cpu:
     build:
       context: .
       args:
-        DEVICE: cpu
-        TORCH_VERSION: "2.3.1"
-        TV_VERSION: "0.18.1"
-        TA_VERSION: "2.3.1"
+        TORCH_CHANNEL: "cu121"
     image: banana-leaf:cpu
     working_dir: /app
     volumes:
       - ./:/app
-      - ./data:/data
-      - ./runs:/app/runs
-    environment:
-      - DATA_DIR=/data
-      - OUTPUT_DIR=/app/runs
+      - ./dataset:/app/dataset
+      - ./output:/app/output  
     tty: true
 
   banana-gpu:
     build:
       context: .
       args:
-        DEVICE: gpu
-        TORCH_VERSION: "2.3.1"
-        TV_VERSION: "0.18.1"
-        TA_VERSION: "2.3.1"
+        TORCH_CHANNEL: "cu121"
     image: banana-leaf:gpu
     working_dir: /app
     volumes:
       - ./:/app
-      - ./data:/data
-      - ./runs:/app/runs
-    environment:
-      - DATA_DIR=/data
-      - OUTPUT_DIR=/app/runs
+      - ./dataset:/app/dataset
+      - ./output:/app/output  
+
     tty: true
-    # ต้องติดตั้ง NVIDIA Container Toolkit บนโฮสต์
     deploy:
       resources:
         reservations:

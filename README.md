@@ -1,11 +1,12 @@
 # 🍌 Banana Leaf Disease Classification
 
-โปรเจกต์นี้เป็นระบบจำแนกโรคใบกล้วยด้วย Deep Learning (PyTorch)  
-รองรับการ train / evaluate / test โมเดล และสามารถรันได้ทั้ง **CPU** และ **GPU (NVIDIA)** ผ่าน Docker
+This project is a Deep Learning (PyTorch) system for **banana leaf disease classification**.  
+It supports **training / evaluation / testing** the model, and can run on both **CPU** and **GPU (NVIDIA)** using Docker.  
+Cross-platform builds are supported (**x86 / ARM**).
 
 ---
 
-## 📂 โครงสร้างโปรเจกต์
+## 📂 Project Structure
 
 ```
 banana-leaf-disease-classfication/
@@ -16,66 +17,73 @@ banana-leaf-disease-classfication/
 ├─ Dockerfile
 ├─ docker-compose.yml
 ├─ .dockerignore
-├─ banana_cnn.pth        # ไฟล์โมเดลที่ได้หลังการเทรน
-└─ dataset/              # dataset สำหรับ train/valid/test
+├─ banana_cnn.pth        # Trained model file (after training)
+├─ output/               # Output results (e.g. test images, logs)
+└─ dataset/              # Dataset for train/valid/test
 ```
 
 ---
 
-## 🚀 การใช้งานด้วย Docker
+## 🚀 Usage with Docker
 
-### 1. สร้างอิมเมจ
+### 1. Build Images
 
-#### CPU
+#### CPU (PyTorch CPU wheels)
 ```bash
-docker compose build banana-cpu
+docker compose build --build-arg TORCH_CHANNEL=cpu banana-cpu
 ```
 
-#### GPU (CUDA)
+#### GPU (CUDA 12.1, NVIDIA only)
 ```bash
-docker compose build banana-gpu
+docker compose build --build-arg TORCH_CHANNEL=cu121 banana-gpu
 ```
 
 ---
 
-### 2. ใช้ `docker-compose`
+### 2. Run with `docker compose`
 
-#### เปิด shell (CPU)
+> ⚠️ Every command below uses `--rm` so the container will be removed automatically after finishing.  
+> This keeps the system clean and avoids wasting disk space.
+
+#### Train model (CPU)
 ```bash
-docker compose run --rm banana-cpu
+docker compose run --rm banana-cpu python train.py --data dataset --out output
 ```
 
-#### เทรนโมเดล (CPU)
+#### Evaluate model (CPU)
 ```bash
-docker compose run --rm banana-cpu \
-  python train.py --data dataset --out .
+docker compose run --rm banana-cpu python evaluate.py --data dataset --out output
 ```
 
-#### ประเมินผล (CPU)
+#### Test model (CPU)
 ```bash
-docker compose run --rm banana-cpu \
-  python evaluate.py --data dataset --out .
+docker compose run --rm banana-cpu python test.py --data dataset --out output
 ```
 
-#### ทดสอบ (CPU)
+#### Train model (GPU)
 ```bash
-docker compose run --rm banana-cpu \
-  python test.py --data dataset --out .
+docker compose run --rm banana-gpu python train.py --data dataset --out output
 ```
 
-#### ใช้งาน GPU
+#### Evaluate model (GPU)
 ```bash
-docker compose run --rm banana-gpu python train.py --data dataset --out .
+docker compose run --rm banana-gpu python evaluate.py --data dataset --out output
+```
+
+#### Test model (GPU)
+```bash
+docker compose run --rm banana-gpu python test.py --data dataset --out output
 ```
 
 ---
 
 ## ⚙️ Dataset
 
-- Dataset (Roboflow): [Banana Leaf Disease](https://app.roboflow.com/mango-0rmdb/banana-leaf-disease-yxrhe/1)  
-- Original Dataset (Kaggle): [Banana Disease Recognition Dataset](https://www.kaggle.com/datasets/sujaykapadnis/banana-disease-recognition-dataset)
+- Roboflow Dataset: [Banana Leaf Disease](https://app.roboflow.com/mango-0rmdb/banana-leaf-disease-yxrhe/1)  
+- Original Dataset: [Kaggle - Banana Disease Recognition Dataset](https://www.kaggle.com/datasets/sujaykapadnis/banana-disease-recognition-dataset)
 
-โปรเจกต์นี้คาดหวังให้มี dataset อยู่ใน `./dataset` เช่น:
+Expected dataset folder structure:
+
 ```
 dataset/
 ├── train/
@@ -86,18 +94,20 @@ dataset/
 │   ├── Banana Moko Disease/
 │   ├── Banana Panama Disease/
 │   └── Banana Yellow Sigatoka Disease/
-├── valid/ ...
-└── test/ ...
+├── valid/
+└── test/
 ```
 
 ---
 
-## 📌 หมายเหตุ
+## 📌 Notes
 
-- ไฟล์ `requirements.txt` จะถูกติดตั้งใน container โดยเว้น **torch/torchvision** ให้ใช้จาก base image เพื่อหลีกเลี่ยงปัญหาเวอร์ชันชนกัน
-- หากต้องการระบุเวอร์ชัน PyTorch เอง สามารถแก้ `Dockerfile` ได้
-- ไฟล์โมเดล `.pth` จะถูกบันทึกไว้ที่ root ของโปรเจกต์
-- ต้องติดตั้ง [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) หากจะรัน GPU บน Docker
+- All dependencies are installed from `requirements.txt` during Docker build.  
+- PyTorch wheels are resolved via `TORCH_CHANNEL` build arg (`cpu` or `cu121`).  
+- The trained model is saved as `banana_cnn.pth` in the project root.  
+- Test results and generated images are saved under the `/output` folder.  
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) is required for GPU support.  
+- Compatible with both **x86_64** and **ARM64 (Apple Silicon)** architectures.
 
 ---
 
