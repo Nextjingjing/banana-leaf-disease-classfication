@@ -69,9 +69,13 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.fc.parameters(), lr=0.001)
 
 # ===============================
-# 5. Training Loop
+# 5. Training Loop with Early Stopping
 # ===============================
-def train_model(model, criterion, optimizer, num_epochs=10):
+def train_model(model, criterion, optimizer, num_epochs=50, patience=5):
+    best_acc = 0.0
+    best_model_wts = model.state_dict()
+    counter = 0 
+
     for epoch in range(num_epochs):
         print(f"\nEpoch {epoch+1}/{num_epochs}")
         for phase in ["train", "valid"]:
@@ -102,12 +106,27 @@ def train_model(model, criterion, optimizer, num_epochs=10):
             epoch_acc = running_corrects.double() / len(image_datasets[phase])
             print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
 
+            if phase == "valid":
+                if epoch_acc > best_acc:
+                    best_acc = epoch_acc
+                    best_model_wts = model.state_dict()
+                    counter = 0  
+                    print("Validation improved, saving best model...")
+                else:
+                    counter += 1
+                    print(f"No improvement. Patience counter: {counter}/{patience}")
+                    if counter >= patience:
+                        print("Early stopping triggered!")
+                        model.load_state_dict(best_model_wts)
+                        return model
+
+    model.load_state_dict(best_model_wts)
     return model
 
 # ===============================
 # 6. Main Execution (Windows Safe)
 # ===============================
 if __name__ == "__main__":
-    trained_model = train_model(model, criterion, optimizer, num_epochs=10)
+    trained_model = train_model(model, criterion, optimizer, num_epochs=50)
     torch.save(trained_model.state_dict(), "banana_cnn.pth")
     print("Model saved as banana_cnn.pth")
